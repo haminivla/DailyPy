@@ -1,3 +1,9 @@
 2025-01-02 21:13:24,234 - __main__ - INFO - Token value: Token not available!
 2025-01-02 13:37:15,113 - __main__ - INFO - Token value: 1234
 2025-01-02 13:49:13,468 - __main__ - INFO - Token value: 1234
+2025-01-04 15:58:23,061 - __main__ - INFO - Token value: Token not available!
+2025-01-04 16:09:17,202 - __main__ - INFO - Token value: Token not available!
+2025-01-04 16:35:10,115 - __main__ - INFO - Weather in Paris: -3.0
+2025-01-04 16:35:10,115 - __main__ - INFO - Token value: Token not available!
+2025-01-04 16:38:25,483 - __main__ - INFO - Weather in Paris: -3.0
+2025-01-04 16:38:25,493 - __main__ - INFO - Token value: Token not available!

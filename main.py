@@ -16,6 +16,12 @@ formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(messag
 logger_file_handler.setFormatter(formatter)
 logger.addHandler(logger_file_handler)
 
+r = requests.get('https://api.open-meteo.com/v1/forecast?latitude=48.8566&longitude=2.3522&current_weather=true')
+if r.status_code == 200:
+    data = r.json()
+    temperature = data["current_weather"]["temperature"]
+    logger.info(f'Weather in Paris: {temperature}')
+
 try:
     SOME_SECRET = os.environ["SOME_SECRET"]
 except KeyError:
@@ -23,12 +29,6 @@ except KeyError:
     #logger.info("Token not available!")
     #raise
 
-
 if __name__ == "__main__":
     logger.info(f"Token value: {SOME_SECRET}")
 
-    r = requests.get('https://weather.talkpython.fm/api/weather/?city=Berlin&country=DE')
-    if r.status_code == 200:
-        data = r.json()
-        temperature = data["forecast"]["temp"]
-        logger.info(f'Weather in Berlin: {temperature}')

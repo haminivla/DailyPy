@@ -47,3 +47,6 @@ venv.bak/
 
 # Output
 status.log
+
+# JSON
+haoshoken-12da629190c2.json
