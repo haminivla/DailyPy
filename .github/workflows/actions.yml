@@ -2,7 +2,7 @@ name: run main.py
 
 on:
   schedule:
-    - cron: '*/5 * * * *' # At 1 Jan 00h00 (https://crontab.guru)
+    - cron: '*/20 * * * *' # At 1 Jan 00h00 (https://crontab.guru)
 
 jobs:
   build:
