@@ -16,7 +16,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    
+
       - name: checkout repo content
         uses: actions/checkout@v2 # checkout the repository content to github runner
 
@@ -25,7 +25,7 @@ jobs:
         with:
           project_id: 'haoshoken'
           workload_identity_provider: 'projects/289880474417/locations/global/workloadIdentityPools/github/providers/dailypy'
-          # service_account: 'gsheet-accessor@haoshoken.iam.gserviceaccount.com'
+          service_account: 'gsheet-accessor@haoshoken.iam.gserviceaccount.com'
 
       - name: setup python
         uses: actions/setup-python@v4
