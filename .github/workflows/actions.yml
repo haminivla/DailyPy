@@ -21,7 +21,7 @@ jobs:
         uses: google-github-actions/auth@v2
         with:
           project_id: 'haoshoken'
-          workload_identity_provider: 'https://iam.googleapis.com/projects/289880474417/locations/global/workloadIdentityPools/github/providers/dailypy'
+          workload_identity_provider: 'projects/289880474417/locations/global/workloadIdentityPools/github/providers/dailypy'
           service_account: 'gsheet-accessor@haoshoken.iam.gserviceaccount.com'
 
       - name: checkout repo content
