@@ -1,7 +1,8 @@
-import google.auth
+import gspread
+import os
+from google.auth import default
 from google.auth.transport.requests import Request
 from google.oauth2 import service_account
-from googleapiclient.discovery import build
 
 import logging
 import logging.handlers
@@ -22,7 +23,42 @@ formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(messag
 logger_file_handler.setFormatter(formatter)
 logger.addHandler(logger_file_handler)
 
-# Path to your service account JSON credentials
+def authenticate():
+
+    # Define the required scopes for both Google Sheets and Google Drive
+    SCOPES = [
+        "https://www.googleapis.com/auth/spreadsheets",     # Full access to Google Sheets
+        "https://www.googleapis.com/auth/drive"             # Full access to Google Drive
+    ]
+
+    if 'GITHUB_ACTIONS' in os.environ:
+        # Running in GitHub Actions - authenticate via Workload Identity Federation
+        # This assumes the environment has the right credentials for GitHub Actions
+        creds, project = default(scopes=SCOPES)  # This gets the credentials provided by GitHub Actions
+    else:
+        # Running locally - authenticate via service account file
+        creds = service_account.Credentials.from_service_account_file(
+            'haoshoken-12da629190c2.json', 
+            scopes=SCOPES
+        )
+    return creds
+
+# Authenticate
+creds = authenticate()
+
+# Create a client using gspread
+gc = gspread.authorize(creds)
+
+# Open the Google Sheet by its name
+sheet = gc.open('Get Europe Cities Temperature').worksheet('Sheet3')
+
+# Retrieve data from range A1:A3 on Sheet3
+data = sheet.get('A1:A3')
+print(data)
+logger.info(f"From GSheet: {data}")
+
+'''# Path to your service account JSON credentials
+# https://cloud.google.com/blog/products/identity-security/enabling-keyless-authentication-from-github-actions
 SERVICE_ACCOUNT_FILE = os.getenv('GOOGLE_APPLICATION_KEY')
 
 if not SERVICE_ACCOUNT_FILE:
@@ -55,6 +91,7 @@ def get_sheet_data():
         for row in values:
             print(row)
             logger.info(f"From GSheet: {row}")
+'''
 
 # Retrieve weather temperature from API
 r = requests.get('https://api.open-meteo.com/v1/forecast?latitude=48.8566&longitude=2.3522&current_weather=true')
@@ -72,6 +109,5 @@ except KeyError:
     #raise
 
 if __name__ == "__main__":
-    get_sheet_data()
     logger.info(f"Token value: {SOME_SECRET}")
 

@@ -2,12 +2,19 @@ name: run main.py
 
 on:
   schedule:
-    - cron: '0 0 1 1 *' # At 1 Jan 00h00 (https://crontab.guru)
+    - cron: '*/10 * * * *' # At 1 Jan 00h00 (https://crontab.guru)
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+
+    - name: google workload identity provider
+      uses: 'google-github-actions/auth@v2'
+      with:
+        project_id: 'haoshoken'
+        workload_identity_provider: 'https://iam.googleapis.com/projects/289880474417/locations/global/workloadIdentityPools/github/providers/dailypy'
+        service_account: 'gsheet-accessor@haoshoken.iam.gserviceaccount.com'
 
       - name: checkout repo content
         uses: actions/checkout@v2 # checkout the repository content to github runner
@@ -20,7 +27,7 @@ jobs:
       - name: install python packages
         run: |
           python -m pip install --upgrade pip
-          pip install google-auth google-auth-oauthlib google-auth-httplib2 google-api-python-client
+          pip install gspread google-auth
           pip install -r requirements.txt
 
       - name: execute py script # run main.py
