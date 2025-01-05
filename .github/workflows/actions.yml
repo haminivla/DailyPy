@@ -9,12 +9,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - name: google workload identity provider
-      uses: 'google-github-actions/auth@v2'
-      with:
-        project_id: 'haoshoken'
-        workload_identity_provider: 'https://iam.googleapis.com/projects/289880474417/locations/global/workloadIdentityPools/github/providers/dailypy'
-        service_account: 'gsheet-accessor@haoshoken.iam.gserviceaccount.com'
+      - name: google workload identity provider
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: 'haoshoken'
+          workload_identity_provider: 'https://iam.googleapis.com/projects/289880474417/locations/global/workloadIdentityPools/github/providers/dailypy'
+          service_account: 'gsheet-accessor@haoshoken.iam.gserviceaccount.com'
 
       - name: checkout repo content
         uses: actions/checkout@v2 # checkout the repository content to github runner
