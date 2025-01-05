@@ -1,13 +1,16 @@
 name: run main.py
 
 on:
-  
   push:     # Trigger workflow on a push to the 'main' branch
     branches:
       - main
 
   schedule: # Trigger workflow at 1 Jan 00h00 (https://crontab.guru)
     - cron: '*/10 * * * *' 
+
+permissions:
+  id-token: write  # Required for Workload Identity Federation
+  contents: read   # To read repository content (checkout action)
 
 jobs:
   build:
