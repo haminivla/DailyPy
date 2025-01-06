@@ -10,7 +10,7 @@ on:
 
 permissions:
   id-token: write  # Required for Workload Identity Federation
-  contents: read   # To read repository content (checkout action)
+  contents: write  # To read repository content (checkout action)
 
 jobs:
   build:
