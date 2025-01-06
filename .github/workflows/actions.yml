@@ -18,14 +18,14 @@ jobs:
     steps:
 
       - name: checkout repo content
-        uses: actions/checkout@v2 # checkout the repository content to github runner
+        uses: actions/checkout@v4 # checkout the repository content to github runner
 
       - name: google workload identity provider
         uses: google-github-actions/auth@v2
         with:
           project_id: 'haoshoken'
           workload_identity_provider: 'projects/289880474417/locations/global/workloadIdentityPools/github/providers/dailypy'
-          service_account: 'gsheet-accessor@haoshoken.iam.gserviceaccount.com'
+          # service_account: 'gsheet-accessor@haoshoken.iam.gserviceaccount.com'
 
       - name: setup python
         uses: actions/setup-python@v4

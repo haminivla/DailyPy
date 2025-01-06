@@ -50,3 +50,4 @@ status.log
 
 # JSON
 haoshoken-12da629190c2.json
+gha-creds-*.json
