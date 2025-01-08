@@ -58,14 +58,20 @@ print(data)
 logger.info(f"From GSheet: {data}")
 
 # Retrieve weather temperature from API
-r = requests.get('https://api.open-meteo.com/v1/forecast?latitude=48.8566&longitude=2.3522&current_weather=true')
+r = requests.get('https://api.open-meteo.com/v1/forecast?latitude=48.8566,1.3521&longitude=2.3522,103.8198&current_weather=true')
 if r.status_code == 200:
-    data = r.json()
-    temperature = data["current_weather"]["temperature"]
-    logger.info(f'Weather in Paris: {temperature}')
+    weather_data = r.json()
+    temperature_list = []
+
+    for index, city_data in enumerate(weather_data):
+        temperature = city_data["current_weather"]["temperature"]
+        temperature_list.append([index, temperature])
+        print(f"Temperature for city {index}: {temperature} °C")
+    #temperature = [i["current_weather"]["temperature"] for i in data]
+    #logger.info(f'Weather in Paris: {temperature}')
 
 # Update weather temperature data into Sheet3
-sheet.update('B1', [[temperature]])
+sheet.update(temperature_list, 'B1:C2')
 
 '''# Path to your service account JSON credentials
 # https://cloud.google.com/blog/products/identity-security/enabling-keyless-authentication-from-github-actions
