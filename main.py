@@ -65,7 +65,7 @@ if r.status_code == 200:
     logger.info(f'Weather in Paris: {temperature}')
 
 # Update weather temperature data into Sheet3
-sheet.update('B1', f'Weather in Paris: {temperature}')
+sheet.update('B1', [[temperature]])
 
 '''# Path to your service account JSON credentials
 # https://cloud.google.com/blog/products/identity-security/enabling-keyless-authentication-from-github-actions
