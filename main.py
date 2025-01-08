@@ -8,7 +8,7 @@ import logging
 import logging.handlers
 import os
 
-import requests
+import requests     # to retrieve data via https requests
 
 # Setup logging
 logger = logging.getLogger(__name__)
@@ -57,6 +57,16 @@ data = sheet.get('A1:A3')
 print(data)
 logger.info(f"From GSheet: {data}")
 
+# Retrieve weather temperature from API
+r = requests.get('https://api.open-meteo.com/v1/forecast?latitude=48.8566&longitude=2.3522&current_weather=true')
+if r.status_code == 200:
+    data = r.json()
+    temperature = data["current_weather"]["temperature"]
+    logger.info(f'Weather in Paris: {temperature}')
+
+# Update weather temperature data into Sheet3
+sheet.update('B1', temperature)
+
 '''# Path to your service account JSON credentials
 # https://cloud.google.com/blog/products/identity-security/enabling-keyless-authentication-from-github-actions
 SERVICE_ACCOUNT_FILE = os.getenv('GOOGLE_APPLICATION_KEY')
@@ -91,14 +101,6 @@ def get_sheet_data():
         for row in values:
             print(row)
             logger.info(f"From GSheet: {row}")
-'''
-
-# Retrieve weather temperature from API
-r = requests.get('https://api.open-meteo.com/v1/forecast?latitude=48.8566&longitude=2.3522&current_weather=true')
-if r.status_code == 200:
-    data = r.json()
-    temperature = data["current_weather"]["temperature"]
-    logger.info(f'Weather in Paris: {temperature}')
 
 # Test Github environment variables
 try:
