@@ -33,28 +33,22 @@ def authenticate():
 
     if 'GITHUB_ACTIONS' in os.environ:
         # Running in GitHub Actions - authenticate via Workload Identity Federation
-        # This assumes the environment has the right credentials for GitHub Actions
-        creds, project = default(scopes=SCOPES)  # This gets the credentials provided by GitHub Actions
+        creds, project = default(scopes=SCOPES)             # This gets the credentials provided by GitHub Actions
+        gc = gspread.authorize(creds)
     else:
         # Running locally - authenticate via service account file
-        creds = service_account.Credentials.from_service_account_file(
-            'haoshoken-12da629190c2.json', 
-            scopes=SCOPES
-        )
-    return creds
+        gc = gspread.service_account(filename='haoshoken-12da629190c2.json')
+    return gc
 
-# Authenticate
-creds = authenticate()
+# creds = authenticate()              # Run authenticate function to obtain the token credentials
+# gc = gspread.authorize(creds)       # Create a client using gspread
 
-# Create a client using gspread
-gc = gspread.authorize(creds)
+gc = authenticate()
 
 # Open the Google Sheet by its name
 sheet = gc.open('Get Europe Cities Temperature').worksheet('Sheet3')
 
-# Retrieve data from range A1:A3 on Sheet3
-data = sheet.get('A1:A3')
-print(data)
+data = sheet.get('A1:A3')               # Retrieve data from range A1:A3 on Sheet3
 logger.info(f"From GSheet: {data}")
 
 # Retrieve weather temperature from API
@@ -67,11 +61,9 @@ if r.status_code == 200:
         temperature = city_data["current_weather"]["temperature"]
         temperature_list.append([index, temperature])
         print(f"Temperature for city {index}: {temperature} °C")
-    #temperature = [i["current_weather"]["temperature"] for i in data]
-    #logger.info(f'Weather in Paris: {temperature}')
+    #logger.info(f'Weather in city: {temperature}')
 
-# Update weather temperature data into Sheet3
-sheet.update(temperature_list, 'B1:C2')
+sheet.update(temperature_list, 'B1:C2') # Update weather temperature data into Sheet3
 
 '''# Path to your service account JSON credentials
 # https://cloud.google.com/blog/products/identity-security/enabling-keyless-authentication-from-github-actions
