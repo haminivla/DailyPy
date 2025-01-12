@@ -46,7 +46,10 @@ def authenticate():     # Perform authentication and return the authenticated gs
 async def getStockQuotes():   # Retrieve High, Low, Close and Change % of a stock and return as an array
 
     # Launch the headless browser
-    browser = await launch(headless=True)
+    browser = await launch(
+        headless=True,  # Ensure headless mode
+        args=['--no-sandbox', '--disable-setuid-sandbox']  # Add flags for headless environments (e.g. CI/CD)
+    )
     page = await browser.newPage()
 
     # Go to the webpage
