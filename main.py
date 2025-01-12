@@ -8,7 +8,11 @@ import logging
 import logging.handlers
 import os
 
-import requests     # to retrieve data via https requests
+import re
+import asyncio                  # run asynchronous functions
+import requests                 # retrieve data via https requests
+from pyppeteer import launch    # run headless Chrome browser to return the web pages 
+from bs4 import BeautifulSoup   # scrap information from web pages
 
 # Setup logging
 logger = logging.getLogger(__name__)
@@ -23,9 +27,8 @@ formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(messag
 logger_file_handler.setFormatter(formatter)
 logger.addHandler(logger_file_handler)
 
-def authenticate():
+def authenticate():     # Perform authentication and return the authenticated gspread client
 
-    # Define the required scopes for both Google Sheets and Google Drive
     SCOPES = [
         "https://www.googleapis.com/auth/spreadsheets",     # Full access to Google Sheets
         "https://www.googleapis.com/auth/drive"             # Full access to Google Drive
@@ -33,21 +36,55 @@ def authenticate():
 
     if 'GITHUB_ACTIONS' in os.environ:
         # Running in GitHub Actions - authenticate via Workload Identity Federation
-        creds, project = default(scopes=SCOPES)             # This gets the credentials provided by GitHub Actions
+        creds, project = default(scopes=SCOPES)
         gc = gspread.authorize(creds)
     else:
         # Running locally - authenticate via service account file
         gc = gspread.service_account(filename='haoshoken-12da629190c2.json')
     return gc
 
-# creds = authenticate()              # Run authenticate function to obtain the token credentials
-# gc = gspread.authorize(creds)       # Create a client using gspread
+async def getStockQuotes():   # Retrieve High, Low, Close and Change % of a stock and return as an array
 
-gc = authenticate()
+    # Launch the headless browser
+    browser = await launch(headless=True)
+    page = await browser.newPage()
 
-# Open the Google Sheet by its name
-sheet = gc.open('Get Europe Cities Temperature').worksheet('Sheet3')
+    # Go to the webpage
+    await page.goto("https://www.shareinvestor.com/quote/SGX:O39")
 
+    # Wait for the page to load (you can adjust this as needed)
+    await page.waitForSelector('#sic_counterQuote_lastdone')  # Ensure the element is present
+
+    # Get the page content after JavaScript has been rendered
+    content = await page.content()
+
+    # Parse the rendered html page with BeautifulSoup
+    soup = BeautifulSoup(content, 'html.parser')
+    try:
+        high = soup.find('div', {'id': 'sic_counterQuote_high'}).text.strip()
+        low = soup.find('div', {'id': 'sic_counterQuote_low'}).text.strip()
+        close = soup.find('span', {'id': 'sic_counterQuote_lastdone'}).text.strip()
+        # Use regex to extract the % value in between the brackets
+        change = re.search(r'\((.*?)\)', soup.find('span', {'id': 'sic_counterQuote_chg_perc_change'}).text.strip())
+        change = change.group(1).replace('%', '').strip()
+
+        price = [round(float(high),2), round(float(low),2), round(float(close),2), round(float(change),2)]
+
+        # Print the extracted values
+        print(f"Prices: {price}")
+
+    except AttributeError as e:
+        print("Error extracting data: Could not find the required elements.")
+    await browser.close()
+
+#gc = authenticate()
+#sheet = gc.open('Get Europe Cities Temperature').worksheet('Sheet3')
+
+# Run the asyncio event loop
+asyncio.get_event_loop().run_until_complete(getStockQuotes())
+#getStockQuotes()
+
+'''
 data = sheet.get('A1:A3')               # Retrieve data from range A1:A3 on Sheet3
 logger.info(f"From GSheet: {data}")
 
@@ -65,49 +102,4 @@ if r.status_code == 200:
 
 sheet.update(temperature_list, 'B1:C2') # Update weather temperature data into Sheet3
 
-'''# Path to your service account JSON credentials
-# https://cloud.google.com/blog/products/identity-security/enabling-keyless-authentication-from-github-actions
-SERVICE_ACCOUNT_FILE = os.getenv('GOOGLE_APPLICATION_KEY')
-
-if not SERVICE_ACCOUNT_FILE:
-    # raise ValueError("Google service account credentials file not set in environment variable 'GOOGLE_APPLICATION_KEY'")
-    SERVICE_ACCOUNT_FILE = 'haoshoken-12da629190c2.json'
-
-# Scopes needed for Sheets API access
-SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
-
-# Authenticate with the service account and generate the credentials object
-credentials = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
-
-# Use the credentials to build the service object
-service = build('sheets', 'v4', credentials=credentials)
-
-# Specify the ID of the Google Sheet and the range of data you want to retrieve
-SPREADSHEET_ID = '1k0J_FvbWzEabCrs4omCcmC0rvWtdd__4t18mp_ZOvTA'
-RANGE_NAME = 'Sheet3!A1:A3'
-
-# Call the Sheets API to retrieve data
-def get_sheet_data():
-    sheet = service.spreadsheets()
-    result = sheet.values().get(spreadsheetId=SPREADSHEET_ID, range=RANGE_NAME).execute()
-    values = result.get('values', [])
-
-    if not values:
-        print('No data found.')
-    else:
-        print('Data retrieved from sheet:')
-        for row in values:
-            print(row)
-            logger.info(f"From GSheet: {row}")
-
-# Test Github environment variables
-try:
-    SOME_SECRET = os.environ["SOME_SECRET"]
-except KeyError:
-    SOME_SECRET = "Token not available!"
-    #logger.info("Token not available!")
-    #raise
-
-if __name__ == "__main__":
-    logger.info(f"Token value: {SOME_SECRET}")
 '''
